@@ -1,17 +1,57 @@
-// 먼저 로그인 화면에서 go-register를 누르면 fade out 되도록 한다
-var loginformElement = document.getElementById('login-form')
-var registerformElement = document.getElementById('register-form')
+var ProfileManager = require('./profilemanager')
 
-var registerTxt = document.getElementById('go-register')
-registerTxt.addEventListener('click', function () {
-  fadeOutIn(loginformElement, registerformElement, 500)
+ProfileManager.verifyUser(function (err, profile) {
+  var roomSectionElement = document.getElementById('room-section')
+  var chatSectionElement = document.getElementById('chat-section')
+  var loginSectionElement = document.getElementById('login-section')
+  if (err) {
+    // 로그인이 안되어 있으면
+    roomSectionElement.style.display = 'none'
+    chatSectionElement.style.display = 'none'
+
+    // 먼저 로그인 화면에서 go-register를 누르면 fade out 되도록 한다
+    var loginformElement = document.getElementById('login-form')
+    var registerformElement = document.getElementById('register-form')
+
+    var registerTxt = document.getElementById('go-register')
+    registerTxt.addEventListener('click', function () {
+      fadeOutIn(loginformElement, registerformElement, 500)
+    })
+
+    var loginTxt = document.getElementById('go-login')
+    loginTxt.addEventListener('click', function () {
+      fadeOutIn(registerformElement, loginformElement, 500)
+    })
+
+    loginformElement.addEventListener('submit', function (e) {
+      e.preventDefault()
+      ProfileManager.submitLogin(document.loginForm.identifier.value, document.loginForm.password.value, function (err, msg) {
+        if (err) {
+          throw err
+        }
+      })
+      return false // stop propagating
+    })
+
+    registerformElement.addEventListener('submit', function (e) {
+      e.preventDefault()
+      ProfileManager.submitRegister(document.registerForm.username.value, document.registerForm.identifier.value, document.registerForm.password.value, function (err, msg) {
+        if (err) {
+          throw err
+        }
+      })
+      return false // stop propagating
+    })
+  } else {
+    // 로그인이 되어 있으면 바로 채팅 창으로 이동
+    loginSectionElement.style.display = 'none'
+    roomSectionElement.style.display = 'block'
+  }
 })
 
-var loginTxt = document.getElementById('go-login')
-loginTxt.addEventListener('click', function () {
-  fadeOutIn(registerformElement, loginformElement, 500)
-})
-
+/**
+ * Utility Functions
+*/
 function fadeOutIn (outElem, InElement, speed) {
   if (!outElem.style.opacity) {
     outElem.style.opacity = 1
@@ -33,76 +73,3 @@ function fadeOutIn (outElem, InElement, speed) {
     }
   }, speed / 50)
 } // end fadeOut()
-
-var request = require('request')
-
-loginformElement.addEventListener('submit', function (e) {
-  e.preventDefault()
-  submitLogin(document.loginForm.identifier.value, document.loginForm.password.value, function (msg) {
-    console.log('fuck yeah ' + JSON.stringify(msg))
-  })
-  return false // stop propagating
-})
-
-function submitLogin (email, password, callback) {
-  request({
-    method: 'POST',
-    url: 'http://localhost:3000/user/login',
-    headers:
-      {
-        'cache-control': 'no-cache',
-        'content-type': 'application/json'
-      },
-    body: {email: email, password: password},
-    json: true
-  }, function (error, response, body) {
-    if (error) throw new Error(error)
-    callback(body)
-  })
-}
-
-registerformElement.addEventListener('submit', function (e) {
-  e.preventDefault()
-  submitRegister(document.registerForm.username.value, document.registerForm.identifier.value, document.registerForm.password.value, function (msg) {
-    console.log('fuck yeah ' + JSON.stringify(msg))
-  })
-  return false // stop propagating
-})
-
-function submitRegister (name, email, password, callback) {
-  request({
-    method: 'POST',
-    url: 'http://localhost:3000/user/registerUser',
-    headers:
-      {
-        'cache-control': 'no-cache',
-        'content-type': 'application/json'
-      },
-    body: {email: email, password: password, name: name},
-    json: true
-  }, function (error, response, body) {
-    if (error) throw new Error(error)
-    callback(body)
-  })
-}
-
-var options = {
-  method: 'GET',
-  url: 'http://localhost:3000/api/v1/admin/users',
-  headers:
-    {
-      'cache-control': 'no-cache',
-      'content-type': 'application/json',
-      'x-key': 'dldnjswo19@gmail.com',
-      'x-access-token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjE1MDU3MjcyNTMxMTN9.5yN4JA2IdaaMV0YtD1Cazu76CfoLiyye8KeRYJLri2I'
-    },
-  json: true
-}
-
-request(options, function (error, response, body) {
-  if (error) {
-    // throw new Error(error)
-  }
-  // redirect to user page
-  console.log(body.userData)
-})

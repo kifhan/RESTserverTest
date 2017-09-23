@@ -8,6 +8,7 @@ var clientManager = require('./clientManager.js')
 router.post('/user/checkExist', clientManager.checkExist)
 router.post('/user/registerUser', clientManager.registerUser)
 router.post('/user/login', clientManager.login)
+router.post('/user/profile', [require('../middlewares/validateRequest')], clientManager.getOneUserData)
 
 /*
  * Routes that can be accessed only by autheticated users

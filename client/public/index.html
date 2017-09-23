@@ -9,7 +9,7 @@
 </head>
 
 <body>
-<div class="login-page">
+<div id="login-section" class="login-page">
     <div class="form">
         <form name="registerForm" id="register-form">
             <input type="text" name="username" placeholder="name"/>
@@ -26,6 +26,63 @@
             <p class="message">Not registered? <a href="#" id="go-register">Create an account</a></p>
         </form>
     </div>
+</div>
+
+<div id="chat-section" class="container clearfix">
+  <div class="chat">
+    <div class="chat-header clearfix">
+      <img src="<%= user.picture %>" alt="avatar">
+      <div class="chat-about">
+        <div class="chat-room">room.title</div>
+        <div class="chat-num-users"> User(s)</div>
+      </div>
+      <i class="fa fa-users"></i>
+    </div> <!-- end chat-header -->
+
+    <div class="chat-history">
+      <ul>
+      </ul>
+    </div> <!-- end chat-history -->
+
+    <div class="chat-message clearfix">
+      <textarea name="message" placeholder ="Type your message" rows="3"></textarea>
+      <button type="submit">Send</button>
+    </div> <!-- end chat-message -->
+  </div> <!-- end chat -->
+
+  <div class="controls">
+      <a href="/logout" class="logout-btn">Logout</a>
+      <a href="/rooms" class="rooms-btn">Rooms</a>
+  </div>
+
+  <div class="users-list">
+    <ul class="list">
+    </ul>
+  </div>
+</div> <!-- end container -->
+
+<div id="room-section" class="container clearfix">
+  <div class="room" style="width: 100%;">
+    <div class="room-header clearfix">
+      <div class="room-about">
+        <div class="room-title">Rooms</div>
+        <div class="room-num-rooms"></div>
+      </div>
+      <i class="fa fa-th-list"></i>
+    </div> <!-- end room-header -->
+
+    <div class="room-create clearfix" style="border-bottom: 2px solid white;">
+      <input type="text" name="title" autofocus placeholder ="Type a new room">
+      <button>Create</button>
+    </div> <!-- end room-create -->
+
+    <div class="room-list">
+      <ul>
+          <!-- <a href="#"><li class="room-item">room.title</li></a> -->
+          <p class="message" style="text-align: center; padding: 0; margin: 0;">Create your first room!</p>
+      </ul>
+    </div> <!-- end room-list -->
+  </div> <!-- end room -->
 </div>
 
 <script src="./js/main.js"></script>
