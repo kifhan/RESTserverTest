@@ -5,12 +5,12 @@ var registerformElement = document.getElementById('register-form')
 
 var registerTxt = document.getElementById('go-register')
 registerTxt.addEventListener('click', function () {
-  fadeOutIn(loginformElement, registerformElement, 1000)
+  fadeOutIn(loginformElement, registerformElement, 500)
 })
 
 var loginTxt = document.getElementById('go-login')
 loginTxt.addEventListener('click', function () {
-  fadeOutIn(registerformElement, loginformElement, 1000)
+  fadeOutIn(registerformElement, loginformElement, 500)
 })
 
 function fadeOutIn (outElem, InElement, speed) {
