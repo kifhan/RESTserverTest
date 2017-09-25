@@ -1,5 +1,5 @@
 var jwt = require('jwt-simple')
-var user = require('./../models/User')
+var user = require('../models/user')
 module.exports = function (req, res, next) {
   // When performing a cross domain request, you will recieve
   // a preflighted request first. This is to check if our the app

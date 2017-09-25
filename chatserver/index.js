@@ -4,17 +4,17 @@ var socketio = require('socket.io')
 
 var socketioAuth = require('socketio-auth')
 var authconfig = require('./socketauth')
-socketioAuth(socketio, {
-  authenticate: authconfig.authenticate,
-  postAuthenticate: authconfig.postAuthenticate,
-  disconnect: authconfig.disconnect,
-  timeout: 1000
-})
 
-var Room = require('../webserver/models/chatroom')
+var Room = require('../webserver/models/roommodel')
 
 module.exports = function (server) {
   var io = socketio.listen(server)
+  socketioAuth(io, {
+    authenticate: authconfig.authenticate,
+    postAuthenticate: authconfig.postAuthenticate,
+    disconnect: authconfig.disconnect,
+    timeout: 5000
+  })
 
   // io.on('connection', function (socket) {
   //   socket.on('join', function (message) {
@@ -30,7 +30,7 @@ module.exports = function (server) {
   // })
 
   // Rooms namespace
-  io.of('/rooms').on('connection', function (socket) {
+  io.on('connection', function (socket) {
     // Create a new room
     socket.on('createRoom', function (title) {
       Room.findOne({'title': new RegExp('^' + title + '$', 'i')}, function (err, room) {
@@ -50,10 +50,7 @@ module.exports = function (server) {
         }
       })
     })
-  })
 
-  // Chatroom namespace
-  io.of('/chatroom').on('connection', function (socket) {
     // Join a chatroom
     socket.on('join', function (roomId) {
       Room.findById(roomId, function (err, room) {
@@ -65,18 +62,18 @@ module.exports = function (server) {
         } else {
           Room.addUser(room, socket, function (err, newRoom) {
             if (err) throw err
+
             // Join the room channel
-            socket.join(newRoom.id)
+            socket.join(newRoom._id)
 
             Room.getUsers(newRoom, socket, function (err, users, countUserInRoom) {
               if (err) throw err
-
               // Return list of all user connected to the room to the current user
               socket.emit('updateUsersList', users, true)
 
               // Return the current user to other connecting sockets in the room
               // ONLY if the user wasn't connected already to the current room
-              if (countUserInRoom === 1) {
+              if (countUserInRoom >= 1) {
                 socket.broadcast.to(newRoom.id).emit('updateUsersList', users[users.length - 1])
               }
             })
@@ -85,8 +82,7 @@ module.exports = function (server) {
       })
     })
 
-    // When a socket exits
-    socket.on('disconnect', function () {
+    function leaveRoom () {
       // Find the room to which the socket is connected to,
       // and remove the current user + socket from this room
       Room.removeUser(socket, function (err, room, userId, countUserInRoom) {
@@ -99,7 +95,11 @@ module.exports = function (server) {
           socket.broadcast.to(room.id).emit('removeUser', userId)
         }
       })
-    })
+    }
+
+    socket.on('leaveRoom', leaveRoom)
+    // When a socket exits
+    socket.on('disconnect', leaveRoom)
 
     // When a new message arrives
     socket.on('newMessage', function (roomId, message) {

@@ -18,10 +18,10 @@ ProfileManager.prototype.verifyUser = function (cb) {
   var self = this
   if (self.storeable) {
     self.token = window.localStorage.getItem('AuthToken')
-    self.profile = window.localStorage.getItem('UserProfile')
+    self.profile = JSON.parse(window.localStorage.getItem('UserProfile'))
     if (self.token && self.profile) {
       request({
-        method: 'POST',
+        method: 'GET',
         url: 'http://localhost:3000/user/profile',
         headers:
         {
@@ -66,12 +66,21 @@ ProfileManager.prototype.submitLogin = function (email, password, callback) {
       //   'username': body.username
       // }
       window.localStorage.setItem('AuthToken', self.token)
-      window.localStorage.setItem('UserProfile', self.profile)
+      window.localStorage.setItem('UserProfile', JSON.stringify(self.profile))
     } else {
       error = error || new Error(body.message)
     }
     callback(error, body)
   })
+}
+
+ProfileManager.prototype.logout = function (callback) {
+  var self = this
+  self.token = null
+  self.profile = null
+  window.localStorage.removeItem('AuthToken')
+  window.localStorage.removeItem('UserProfile')
+  if (callback) callback()
 }
 
 ProfileManager.prototype.submitRegister = function (name, email, password, callback) {
@@ -83,11 +92,15 @@ ProfileManager.prototype.submitRegister = function (name, email, password, callb
       'cache-control': 'no-cache',
       'content-type': 'application/json'
     },
-    body: {email: email, password: password, name: name},
+    body: {email: email, password: password, username: name},
     json: true
   }, function (error, response, body) {
-    // if (error) throw new Error(error)
-    callback(error, body)
+    if (!error && body.status === 'true') {
+      callback(null, body)
+    } else {
+      error = error || new Error(body.message)
+      callback(error, body)
+    }
   })
 }
 
@@ -113,5 +126,6 @@ function storageAvailable (type) {
       storage.length !== 0
   }
 }
-
-module.exports = new ProfileManager()
+var prm = new ProfileManager()
+window.ProfileManager = prm
+module.exports = prm

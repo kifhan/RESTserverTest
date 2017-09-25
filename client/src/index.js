@@ -1,4 +1,5 @@
 var ProfileManager = require('./profilemanager')
+var ChatApp = require('./chat')
 
 ProfileManager.verifyUser(function (err, profile) {
   var roomSectionElement = document.getElementById('room-section')
@@ -6,8 +7,8 @@ ProfileManager.verifyUser(function (err, profile) {
   var loginSectionElement = document.getElementById('login-section')
   if (err) {
     // 로그인이 안되어 있으면
-    roomSectionElement.style.display = 'none'
-    chatSectionElement.style.display = 'none'
+    roomSectionElement.className += ' hidden'
+    chatSectionElement.className += ' hidden'
 
     // 먼저 로그인 화면에서 go-register를 누르면 fade out 되도록 한다
     var loginformElement = document.getElementById('login-form')
@@ -29,6 +30,7 @@ ProfileManager.verifyUser(function (err, profile) {
         if (err) {
           throw err
         }
+        window.location.reload(true)
       })
       return false // stop propagating
     })
@@ -39,13 +41,22 @@ ProfileManager.verifyUser(function (err, profile) {
         if (err) {
           throw err
         }
+        window.location.reload(true)
       })
       return false // stop propagating
     })
   } else {
     // 로그인이 되어 있으면 바로 채팅 창으로 이동
-    loginSectionElement.style.display = 'none'
-    roomSectionElement.style.display = 'block'
+    loginSectionElement.className += ' hidden'
+    roomSectionElement.className = roomSectionElement.className.replace(' hidden', '')
+    window.chatapp = new ChatApp(roomSectionElement, chatSectionElement)
+
+    document.getElementById('logout-btn').addEventListener('click', function (e) {
+      ProfileManager.logout(function () {
+        window.location.reload(true)
+      })
+      return false
+    })
   }
 })
 

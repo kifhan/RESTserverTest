@@ -29,7 +29,7 @@ var findById = function (id, callback) {
 var addUser = function (room, socket, callback) {
   // Get current user's id
   var userId = socket.client.profile.userId
-
+  // console.log('get user id: ' + userId);
   // Push a new connection object(i.e. {userId + socketId})
   var conn = { userId: userId, socketId: socket.id }
   room.connections.push(conn)
@@ -60,11 +60,12 @@ var getUsers = function (room, socket, callback) {
     vis[conn.userId] = true
   })
 
+  console.log('user ' + JSON.stringify(users))
   // Loop on each user id, Then:
   // Get the user object by id, and assign it to users array.
   // So, users array will hold users' objects instead of ids.
   users.forEach(function (userId, i) {
-    User.findById(userId, function (err, user) {
+    User.findOne({userId: userId}, function (err, user) {
       if (err) { return callback(err) }
       users[i] = user
       if (i + 1 === users.length) {

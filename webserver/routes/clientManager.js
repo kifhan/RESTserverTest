@@ -42,35 +42,39 @@ var auth = {
   },
 
   registerUser: function (req, res) {
-    var username = req.body.email || ''
+    var email = req.body.email || ''
     var password = req.body.password || ''
+    var username = req.body.username
+    var picture = req.body.picture
 
-    if (username === '' || password === '') {
+    if (email === '' || password === '') {
       res.status(401)
       res.json({
         'status': 401,
-        'message': 'username : ' + username // + ' password : ' + password
+        'message': 'email : ' + email // + ' password : ' + password
       })
       return
     }
 
     User.findOne({
-      email: username
+      email: email
     }, function (error, user) {
       if (error) {
         res.status(401)
         res.json({
           'status': 401,
-          'message': 'username : ' + username // + ' password : ' + password
+          'message': 'email : ' + email // + ' password : ' + password
         })
         return
       }
 
       if (!user) {
         var newUser = new User({
-          email: username,
+          email: email,
           password: password,
-          userRole: 'admin'
+          username: username,
+          picture: picture
+          // userRole: 'admin'
         })
 
         newUser.save(function (error, data) {
@@ -130,6 +134,7 @@ var auth = {
               'status': 'false',
               'message': 'Incorrect email or password'
             })
+            return
           }
           var data = genToken(user)
           res.json({

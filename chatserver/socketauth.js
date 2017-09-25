@@ -1,5 +1,5 @@
 var jwt = require('jwt-simple')
-var userdb = require('./../models/User')
+var userdb = require('../webserver/models/user')
 
 // var socketioAuth = require('socketio-auth')
 // socketioAuth(io, {
@@ -18,10 +18,9 @@ module.exports = {
 
 // authenticate: The only required parameter. It's a function that takes the data sent by the client and calls a callback indicating if authentication was successfull:
 function authenticate (socket, data, callback) {
-  var decoded = jwt.decode(data.token, require('../config/secret.js')())
+  var decoded = jwt.decode(data.token, require('../webserver/config/secret')())
   if (decoded.exp <= Date.now()) callback(new Error('Token Expired'))
-
-  userdb.findUser({email: decoded.email}, function (err, user) {
+  userdb.findOne({email: decoded.email}, function (err, user) {
     if (err || !user) return callback(new Error('User not found'))
     return callback(null, user.email === decoded.email)
   })
@@ -29,13 +28,13 @@ function authenticate (socket, data, callback) {
 
 // postAuthenticate: a function to be called after the client is authenticated. It's useful to keep track of the user associated with a client socket:
 function postAuthenticate (socket, data) {
-  var decoded = jwt.decode(data.token, require('../config/secret.js')())
-
-  userdb.findUser({email: decoded.email}, function (err, user) {
+  var decoded = jwt.decode(data.token, require('../webserver/config/secret')())
+  userdb.findOne({email: decoded.email}, function (err, user) {
     if (err) {
       console.log(err.stack)
     }
     socket.client.profile = decoded
+    console.log('auth succeed: ' + socket.id)
   })
 }
 

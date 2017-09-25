@@ -2,14 +2,14 @@
 var mongoose = require('mongoose')
 var bcrypt = require('bcrypt-nodejs')
 var DEFAULT_USER_PICTURE = '/img/user.jpg'
-var SALT_WORK_FACTOR = 8
+var SALT_WORK_FACTOR = 10
 
 // 스키마 정의
 // email, password, token 필드를 가지며 각각의 필드는 string 타입이다.
 var Schema = mongoose.Schema
 var UserSchema = new Schema({
   email: {type: String, required: true},
-  userId: {type: String, required: true},
+  userId: {type: String, default: null},
   username: {type: String, default: null},
   password: {type: String, default: null},
   socialId: {type: String, default: null},
@@ -41,6 +41,7 @@ UserSchema.pre('save', function (next) {
       next()
     })
   })
+  // next()
 })
 
 // Create an Instance method to validate user's password
@@ -50,6 +51,7 @@ UserSchema.methods.validatePassword = function (password, callback) {
     if (err) return callback(err)
     callback(null, isMatch)
   })
+  // callback(null, password === this.password)
 }
 
 // 스키마를 이용해서 모델을 정의
